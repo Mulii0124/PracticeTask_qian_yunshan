@@ -421,6 +421,12 @@
     el.tempVal.textContent = c.temperature;
     el.cfgStatus.textContent = '';
     el.cfgStatus.className = 'modal__status';
+    // 根据已保存的域名同步高亮预设
+    $$('.preset__opt').forEach(b => {
+      const p = PRESETS[b.dataset.preset];
+      const on = p && c.baseUrl.startsWith(p.baseUrl.replace(/\/v1$/, ''));
+      b.classList.toggle('is-active', !!on);
+    });
     el.modal.hidden = false;
   }
   el.settingsBtn.addEventListener('click', openModal);
@@ -441,6 +447,20 @@
     el.cfgStatus.className = 'modal__status ' + (r.ok ? 'is-ok' : 'is-err');
     if (r.ok && currentWeather) refreshAdvice();
   });
+
+  /* Key 类型预设：M Plan 订阅 Key / 按量计费 API Key */
+  const PRESETS = {
+    mplan: { baseUrl: 'https://api.minimax.cn/v1',    model: 'MiniMax-M3.1-Flash' },
+    payg:  { baseUrl: 'https://api.minimaxi.com/v1', model: 'MiniMax-M2.7' }
+  };
+  function applyPreset(name){
+    const p = PRESETS[name];
+    if (!p) return;
+    el.cfgBaseUrl.value = p.baseUrl;
+    el.cfgModel.value = p.model;
+    $$('.preset__opt').forEach(b => b.classList.toggle('is-active', b.dataset.preset === name));
+  }
+  $$('.preset__opt').forEach(b => b.addEventListener('click', () => applyPreset(b.dataset.preset)));
 
   /* 拉取账号可用模型：避免手填模型名出错 */
   el.cfgFetchModels.addEventListener('click', async () => {
@@ -470,11 +490,13 @@
         o.value = id;
         el.modelList.appendChild(o);
       });
-      // 当前填的模型不存在于列表时，自动选一个文本模型
+      // 当前填的模型不存在于列表时，自动选一个合适的
       const cur = el.cfgModel.value.trim();
       if (!r.models.includes(cur)){
-        const prefer = r.models.find(m => /^MiniMax-M\d/i.test(m) && !/highspeed/i.test(m))
-                   || r.models.find(m => /text|chat/i.test(m))
+        const prefer = r.models.find(m => m === 'MiniMax-M3.1-Flash')
+                   || r.models.find(m => /flash/i.test(m))
+                   || r.models.find(m => /^MiniMax-M3/i.test(m))
+                   || r.models.find(m => /^MiniMax-M\d/i.test(m) && !/highspeed/i.test(m))
                    || r.models[0];
         el.cfgModel.value = prefer;
       }

@@ -9,8 +9,8 @@ const AI = (() => {
 
   const LS_KEY = 'yunshan.ai.config';
   const DEFAULTS = {
-    baseUrl: 'https://api.minimaxi.com/v1',
-    model: 'MiniMax-M2.7',
+    baseUrl: 'https://api.minimax.cn/v1',   // M Plan 订阅 Key 专用域名
+    model: 'MiniMax-M3.1-Flash',
     key: '',
     temperature: 0.8
   };
@@ -59,7 +59,7 @@ const AI = (() => {
         { role: 'user',   content: buildUserPrompt(weather) }
       ],
       temperature: Number(cfg.temperature),
-      max_tokens: 1400,
+      max_tokens: 3000,
       stream: false
     };
 
@@ -81,8 +81,16 @@ const AI = (() => {
         throw new Error('HTTP ' + res.status + ' ' + t.slice(0, 160));
       }
       const data = await res.json();
-      const content = data?.choices?.[0]?.message?.content
-                   ?? data?.reply ?? data?.choices?.[0]?.text;
+      const msg = data?.choices?.[0]?.message;
+      let content = msg?.content;
+      // 开启思考模式的模型，最终答案偶尔会落在 reasoning 字段里
+      if (!content || !String(content).trim()){
+        if (Array.isArray(msg?.reasoning_details)){
+          content = msg.reasoning_details.map(x => x?.text || '').join('\n');
+        } else if (msg?.reasoning_content){
+          content = msg.reasoning_content;
+        }
+      }
       const obj = parseLoose(content);
       if (!obj || !obj.outfit) throw new Error('返回内容不是预期的 JSON');
       return { data: obj, raw: content, model: data?.model || cfg.model };

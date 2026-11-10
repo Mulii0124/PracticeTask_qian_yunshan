@@ -168,15 +168,29 @@
         页面功能依然完整。密钥只保存在你自己的浏览器 localStorage 中。
       </p>
 
+      <div class="preset">
+        <span class="preset__label">你的 Key 属于哪种？（两种 Key 不能混用，选错会 401）</span>
+        <div class="preset__opts">
+          <button type="button" class="preset__opt is-active" data-preset="mplan">
+            <b>M Plan 订阅 Key</b>
+            <small>api.minimax.cn · MiniMax-M3.1-Flash · 扣套餐额度</small>
+          </button>
+          <button type="button" class="preset__opt" data-preset="payg">
+            <b>按量计费 API Key</b>
+            <small>api.minimaxi.com · 扣账户余额 · 需先充值</small>
+          </button>
+        </div>
+      </div>
+
       <label class="field">
         <span>接口地址 Base URL</span>
-        <input id="cfgBaseUrl" type="text" spellcheck="false" placeholder="https://api.minimaxi.com/v1" />
-        <em class="field__hint">中国大陆平台用 api.minimaxi.com，海外平台用 api.minimax.io，两者不可混用</em>
+        <input id="cfgBaseUrl" type="text" spellcheck="false" placeholder="https://api.minimax.cn/v1" />
+        <em class="field__hint">M Plan 订阅 Key 用 api.minimax.cn；按量计费 Key 用 api.minimaxi.com；海外用 api.minimax.io</em>
       </label>
       <label class="field">
         <span>模型 Model</span>
         <div class="field__row">
-          <input id="cfgModel" type="text" list="modelList" spellcheck="false" placeholder="MiniMax-M2.7" />
+          <input id="cfgModel" type="text" list="modelList" spellcheck="false" placeholder="MiniMax-M3.1-Flash" />
           <button class="minibtn" id="cfgFetchModels" type="button">拉取模型列表</button>
         </div>
         <datalist id="modelList"></datalist>
@@ -185,7 +199,7 @@
       <label class="field">
         <span>API Key</span>
         <input id="cfgKey" type="password" spellcheck="false" placeholder="sk-..." autocomplete="off" />
-        <em class="field__hint">仅保存在本机浏览器 localStorage，不会提交到仓库</em>
+        <em class="field__hint">M Plan 订阅 Key 在 platform.minimax.cn/console/plan 获取（sk-cp- 开头）；仅存在本机浏览器，不会提交到仓库</em>
       </label>
       <label class="field">
         <span>温度 Temperature <b id="tempVal">0.8</b></span>

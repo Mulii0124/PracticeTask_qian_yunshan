@@ -44,7 +44,7 @@
 | 城市搜索 | 接入 Open-Meteo 地理编码，支持中英文城市名 |
 | 定位 | 浏览器 Geolocation + OpenStreetMap 反查地名 |
 | 换一套 | 重新生成一套配色与配饰方向不同的方案 |
-| AI 配置面板 | 在页面内填 Base URL / 模型 / API Key，自带连通性测试；面板内可直接查看完整系统提示词 |
+| AI 配置面板 | 在页面内填 Base URL / 模型 / API Key，自带连通性测试；**Key 类型预设**（M Plan 订阅 / 按量计费）一键切换域名与模型；可拉取账号可用模型列表；面板内可直接查看完整系统提示词 |
 | 降级机制 | 模型调用失败自动回落到本地规则引擎，并在状态栏注明原因 |
 
 ## 三、技术栈
@@ -97,19 +97,43 @@ python -m http.server 8123
 
 ### 6.1 三个字段填什么
 
-点右上角 **「AI 设置」**（金色齿轮）打开「AI 配置」面板，填三项：
+点右上角 **「AI 设置」**（金色齿轮）打开「AI 配置」面板。面板最上方是 **「Key 类型预设」** 两张卡片，选一张会自动填好 Base URL 和模型：
+
+| 预设卡片 | 接口地址 Base URL | 模型 Model | 适用 |
+|---|---|---|---|
+| **M Plan 订阅 Key** | `https://api.minimax.cn/v1` | `MiniMax-M3.1-Flash` | MiniMax 官方 **M Plan 套餐** 订阅用户 |
+| **按量计费 API Key** | `https://api.minimaxi.com/v1` | `MiniMax-M2.7` | 在开放平台按调用量付费充值 |
+
+三个字段的含义：
 
 | 字段 | 填什么 | 说明 |
 |---|---|---|
-| 接口地址 Base URL | `https://api.minimaxi.com/v1` | **不要带 `/chat/completions`**，程序会自动拼接 |
-| 模型 Model | `MiniMax-M2.7` | 拿不准就用下面的「拉取模型列表」按钮自动获取 |
+| 接口地址 Base URL | 上面预设自动填好 | **不要带 `/chat/completions`**，程序会自动拼接 |
+| 模型 Model | 上面预设自动填好 | 拿不准就用下面的「拉取模型列表」按钮自动获取 |
 | API Key | `sk-...` 一长串 | 只存在你自己浏览器的 localStorage，不进仓库 |
 
 填完点 **保存并测试**，显示「连接正常」即接入成功；页面右上角标签会从「演示模式」变成「AI · 模型名」，底栏也会标出当前模型。
 
 > 不配置也能用：此时由 `js/config.js` 的本地规则引擎生成建议，底栏标注「本地规则引擎（未配置 API Key）」。
 
-### 6.2 怎么拿到 API Key（以 MiniMax 中国大陆平台为例）
+### 6.2 怎么拿到 Key
+
+#### 方式 A：M Plan 订阅 Key（如果你买了 M Plan 套餐）
+
+1. 打开 **https://platform.minimax.cn/console/plan** 进入 **M Plan 套餐** 页面
+2. 选择 Go / Explore / Build 档位并开通，**订阅 Key 的特征是 `sk-cp-` 前缀**
+3. 复制订阅 Key（同样是**只完整显示一次**，关闭弹窗后无法再查看）
+4. 在页面里选 **「M Plan 订阅 Key」** 预设 → 粘贴 Key → 保存并测试
+
+M Plan 使用注意（依据官方 FAQ）：
+
+- **订阅 Key 与按量计费 API Key 是两套独立的凭据，不能混用**：把订阅 Key 填到 `api.minimaxi.com`、或把按量计费 Key 填到 `api.minimax.cn`，都会失败。
+- 订阅 Key 调用已有按量计费端点时，扣的是 **M Plan 套餐额度**，**不会自动扣账户余额**。
+- 文本模型为 **MiniMax-M3.1-Flash**；Explore 及以上档位额外支持 H3 视频模型。
+- 受 **5 小时窗口 + 周窗口**双重限额，以及 RPM / TPM 限流；额度窗口内高频调用可能被限流，页面会自动降级到本地引擎，不会崩。
+- 官方定位是「个人开发者交互式使用」，**生产环境建议按量付费**——本作业是课堂演示，完全够用。
+
+#### 方式 B：按量计费 API Key（推荐给不想买套餐的人）
 
 1. 打开 **https://platform.minimaxi.com/login** 注册 / 登录（手机号验证码）
 2. **完成实名认证** —— 未认证会限制创建密钥和充值
@@ -117,17 +141,19 @@ python -m http.server 8123
 4. 左侧菜单 **「账户管理 → 接口密钥」→ 创建新的密钥**，填个备注名（如 `yunshan-web`）→ 创建
 5. 密钥**只完整显示一次**，弹窗关闭后无法再查看，立刻复制保存
 
-拿到后粘贴进页面的 API Key 输入框，点「拉取模型列表」会自动列出你账号实际可用的模型，选一个即可。
+拿到 Key 后粘贴进输入框，点 **「拉取模型列表」** 会自动列出你账号实际可用的模型（按 `MiniMax-M3.1-Flash` → 含 `flash` → `MiniMax-M3` 系列 → 其余 `MiniMax-M*` 的优先级自动挑选），选一个即可。
 
-### 6.3 三个最容易踩的坑
+### 6.3 几个最容易踩的坑
 
 | 现象 | 原因 | 解决 |
 |---|---|---|
 | 401 `login fail` | Key 复制不全 / 用了别的平台的 Key | 重新复制；确认平台与域名一致 |
-| 401 | 国内 Key 配了海外域名（或反之） | 国内用 `api.minimaxi.com`，海外用 `api.minimax.io`，**两者不可混用** |
-| 1008 余额不足 | 没充值 / 额度用完 | 回平台充值 |
+| 401 | 国内 Key 配了海外域名（或反之） | 国内用 `api.minimaxi.com` / `api.minimax.cn`，海外用 `api.minimax.io`，**不可混用** |
+| 401 | **M Plan 订阅 Key 配到了按量计费域名** | 订阅 Key 用 `api.minimax.cn`，按量计费 Key 用 `api.minimaxi.com`，**两者互不通用** |
+| 1008 余额不足 | 没充值 / 额度用完 | 回平台充值（用 M Plan 订阅 Key 则检查套餐额度窗口） |
 | 404 | Base URL 里手写了 `/v1/chat/completions` | 只填到 `/v1` 为止 |
 | 模型名报错 | 模型 ID 写错或该账号无权限 | 点「拉取模型列表」自动获取 |
+| 返回内容为空 | 模型默认开启思考过程，token 预算被思考吃掉 | 程序已把 `max_tokens` 提到 3000，并兜底解析 `reasoning_content`，一般无需手动处理 |
 
 ### 6.4 换其他服务商
 
@@ -145,8 +171,9 @@ python -m http.server 8123
 
 | 域名 | `GET /v1/models` | `POST /v1/chat/completions` |
 |---|---|---|
-| `api.minimaxi.com` | HTTP 401 → 跨域通过 | HTTP 401 → 跨域通过 |
-| `api.minimax.io` | HTTP 401 → 跨域通过 | HTTP 401 → 跨域通过 |
+| `api.minimaxi.com`（按量计费） | HTTP 401 → 跨域通过 | HTTP 401 → 跨域通过 |
+| `api.minimax.cn`（M Plan 订阅） | HTTP 401 → 跨域通过 | HTTP 401 → 跨域通过 |
+| `api.minimax.io`（海外） | HTTP 401 → 跨域通过 | HTTP 401 → 跨域通过 |
 | `api.minimax.chat`（旧域名） | HTTP 401 → 跨域通过 | HTTP 401 → 跨域通过 |
 
 401 表示"网络可达、跨域放行，只是密钥无效"，说明浏览器直连这条路是通的。若将来换用其他服务商报跨域错误，页面会自动降级到本地规则引擎，不会白屏。
