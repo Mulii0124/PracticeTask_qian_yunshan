@@ -47,11 +47,13 @@
       <input id="cityInput" type="search" placeholder="搜索城市，如「杭州」「京都」" autocomplete="off" spellcheck="false" />
       <div class="search__results" id="searchResults" hidden></div>
     </div>
-    <button class="iconbtn" id="geoBtn" title="使用当前位置">
+    <button class="iconbtn iconbtn--label" id="geoBtn" title="使用当前位置定位">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="7.5" stroke="currentColor" stroke-width="1.5" opacity=".65"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>定位</span>
     </button>
-    <button class="iconbtn" id="settingsBtn" title="AI 配置">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 3.5v2M12 18.5v2M20.5 12h-2M5.5 12h-2M18 6l-1.4 1.4M7.4 16.6L6 18M18 18l-1.4-1.4M7.4 7.4L6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <button class="iconbtn iconbtn--label iconbtn--accent" id="settingsBtn" title="AI 配置：填写模型接口与密钥">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z" stroke="currentColor" stroke-width="1.7"/><path d="M19.4 14.6a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009.08 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9.08a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>AI 设置</span>
     </button>
   </div>
 </header>
