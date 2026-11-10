@@ -4,6 +4,13 @@
 > 一个把 **实时天气** 翻译成 **穿搭方案** 和 **出行建议** 的单页网站。
 > 视觉基调取自中式青绿山水 + 水墨写意，3D 写实渲染；立绘随体感温度自动更换。
 
+### 在线演示
+
+**https://mulii0124.github.io/PracticeTask_qian_yunshan/**
+
+> 直接打开即可使用：天气走 Open-Meteo 免密钥接口，AI 建议在未配置 Key 时自动由本地规则引擎生成，页面功能完整不白屏。
+> 想体验真实大模型生成，在页面右上角 **「AI 设置」** 里填入自己的 API Key 即可（Key 只存在自己浏览器的 localStorage，不进仓库）。
+
 ![桌面端布局](screenshot-desktop.png)
 
 <details>
@@ -92,6 +99,16 @@ python -m http.server 8123
 ```
 
 部署到任何静态托管（GitHub Pages / Vercel / Netlify / 校园服务器）均可，纯静态无需服务端。
+
+### 已上线：GitHub Pages
+
+本项目已通过 **GitHub Pages** 发布，仓库为 Public：
+
+- 线上地址：**https://mulii0124.github.io/PracticeTask_qian_yunshan/**
+- 发布方式：分支发布（`main` 分支 / `/root` 目录），仓库根目录含 `.nojekyll` 文件，让 Pages 原样吐出静态文件而不走 Jekyll 模板解析
+- 页面内所有资源一律使用**相对路径**，因此部署到 `github.io/<仓库名>/` 子路径下不会丢图丢样式
+
+后续更新只需本地改完 `git push`，GitHub 会自动重新构建发布，无需手动再点设置。
 
 ## 六、接入大模型
 
