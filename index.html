@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>云山行 · AI 穿搭与出行助手</title>
+<meta name="description" content="实时天气驱动的 AI 穿搭与出行建议，3D 质感中式山野场景。" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>" />
+</head>
+<body>
+
+<!-- ============ 3D 场景层 ============ -->
+<div class="scene" id="scene" aria-hidden="true">
+  <div class="scene-sky" id="sceneSky"></div>
+  <div class="scene-bgwrap" id="sceneBgWrap">
+    <img class="scene-img is-active" id="sceneImgA" src="assets/img/scenes/scene-sunny.jpg" alt="" />
+    <img class="scene-img" id="sceneImgB" src="assets/img/scenes/scene-sunny.jpg" alt="" />
+  </div>
+  <div class="scene-tint" id="sceneTint"></div>
+  <div class="scene-mist scene-mist--a"></div>
+  <div class="scene-mist scene-mist--b"></div>
+  <div class="scene-mist scene-mist--c"></div>
+  <canvas class="scene-fx" id="sceneFx"></canvas>
+  <div class="scene-grain"></div>
+  <div class="scene-vignette"></div>
+</div>
+
+<!-- ============ 顶栏 ============ -->
+<header class="topbar">
+  <div class="brand">
+    <span class="brand__mark" aria-hidden="true">
+      <svg viewBox="0 0 48 48" fill="none"><path d="M4 38l12-16 8 10 6-8 14 14z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="34" cy="13" r="5" stroke="currentColor" stroke-width="2.2"/></svg>
+    </span>
+    <div class="brand__text">
+      <h1>云山行</h1>
+      <p>AI 穿搭 · 出行助手</p>
+    </div>
+  </div>
+
+  <div class="locator">
+    <div class="search">
+      <svg class="search__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <input id="cityInput" type="search" placeholder="搜索城市，如「杭州」「京都」" autocomplete="off" spellcheck="false" />
+      <div class="search__results" id="searchResults" hidden></div>
+    </div>
+    <button class="iconbtn" id="geoBtn" title="使用当前位置">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="7.5" stroke="currentColor" stroke-width="1.5" opacity=".65"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+    <button class="iconbtn" id="settingsBtn" title="AI 配置">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 3.5v2M12 18.5v2M20.5 12h-2M5.5 12h-2M18 6l-1.4 1.4M7.4 16.6L6 18M18 18l-1.4-1.4M7.4 7.4L6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ============ 主体 ============ -->
+<main class="stage">
+
+  <!-- 左列：天气 -->
+  <section class="col col--left">
+    <article class="panel panel--weather" id="weatherPanel">
+      <div class="panel__head">
+        <span class="panel__label">实时天气</span>
+        <span class="chip" id="sourceChip">Open-Meteo</span>
+      </div>
+
+      <div class="weather__main">
+        <div class="weather__icon" id="weatherIcon"></div>
+        <div class="weather__temp">
+          <span id="tempNow">--</span><span class="deg">°C</span>
+        </div>
+        <div class="weather__meta">
+          <p class="weather__city" id="cityName">正在定位…</p>
+          <p class="weather__cond" id="condText">—</p>
+          <p class="weather__feels">体感 <b id="feelsNow">--</b>° · <span id="rangeText">—</span></p>
+        </div>
+      </div>
+
+      <dl class="metrics">
+        <div class="metric"><dt>风</dt><dd id="mWind">--</dd></div>
+        <div class="metric"><dt>湿度</dt><dd id="mHumidity">--</dd></div>
+        <div class="metric"><dt>降水概率</dt><dd id="mPrecip">--</dd></div>
+        <div class="metric"><dt>紫外线</dt><dd id="mUv">--</dd></div>
+        <div class="metric"><dt>日出</dt><dd id="mSunrise">--</dd></div>
+        <div class="metric"><dt>日落</dt><dd id="mSunset">--</dd></div>
+      </dl>
+    </article>
+
+    <article class="panel panel--hours">
+      <div class="panel__head">
+        <span class="panel__label">24 小时</span>
+        <span class="chip chip--ghost" id="updatedAt">—</span>
+      </div>
+      <div class="hours" id="hourlyStrip"></div>
+    </article>
+  </section>
+
+  <!-- 中列：人物 -->
+  <section class="col col--center">
+    <div class="figure" id="figure">
+      <div class="figure__halo" id="figureHalo"></div>
+      <img class="figure__img" id="figureImg" src="assets/img/characters/char-mild.png" alt="当前穿搭立绘" />
+      <div class="figure__floor"></div>
+    </div>
+    <div class="figure__badge" id="tierBadge">
+      <span class="figure__tier" id="tierName">—</span>
+      <span class="figure__tip" id="tierTip">等待天气数据</span>
+    </div>
+  </section>
+
+  <!-- 右列：建议 -->
+  <section class="col col--right">
+    <article class="panel panel--outfit">
+      <div class="panel__head">
+        <span class="panel__label">穿搭推荐</span>
+        <span class="chip chip--ai" id="aiChip">演示模式</span>
+      </div>
+      <h2 class="outfit__title" id="outfitTitle">—</h2>
+      <p class="outfit__summary" id="outfitSummary">正在读取天气…</p>
+      <ul class="slots" id="outfitSlots"></ul>
+      <div class="palette" id="paletteRow"></div>
+    </article>
+
+    <article class="panel panel--travel">
+      <div class="panel__head">
+        <span class="panel__label">出行建议</span>
+        <button class="minibtn" id="rerollBtn" title="重新生成一套">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 11a8 8 0 10-2.3 6.1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M20 4.5V11h-6.4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          换一套
+        </button>
+      </div>
+      <p class="travel__summary" id="travelSummary">—</p>
+      <ul class="tips" id="travelTips"></ul>
+    </article>
+
+    <article class="panel panel--note">
+      <div class="panel__head"><span class="panel__label">今日笺</span></div>
+      <p class="note" id="dailyNote">—</p>
+    </article>
+  </section>
+</main>
+
+<!-- ============ 底栏 ============ -->
+<footer class="statusbar">
+  <span id="statusLeft">数据来源：Open-Meteo · 建议模型：本地规则引擎</span>
+  <span class="statusbar__right">云山行 · 网页设计课程作业 · AI 辅助生成</span>
+</footer>
+
+<!-- ============ AI 配置弹窗 ============ -->
+<div class="modal" id="settingsModal" hidden>
+  <div class="modal__backdrop" data-close></div>
+  <div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modal__head">
+      <h2 id="settingsTitle">AI 配置</h2>
+      <button class="iconbtn iconbtn--ghost" data-close aria-label="关闭">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="modal__body">
+      <p class="modal__hint">
+        接入任意 <b>OpenAI 兼容</b> 的大模型接口即可获得实时 AI 推荐；未配置时自动降级为本地规则引擎，
+        页面功能依然完整。密钥只保存在你自己的浏览器 localStorage 中。
+      </p>
+
+      <label class="field">
+        <span>接口地址 Base URL</span>
+        <input id="cfgBaseUrl" type="text" spellcheck="false" placeholder="https://api.minimax.chat/v1" />
+      </label>
+      <label class="field">
+        <span>模型 Model</span>
+        <input id="cfgModel" type="text" spellcheck="false" placeholder="MiniMax-M2" />
+      </label>
+      <label class="field">
+        <span>API Key</span>
+        <input id="cfgKey" type="password" spellcheck="false" placeholder="sk-..." autocomplete="off" />
+      </label>
+      <label class="field">
+        <span>温度 Temperature <b id="tempVal">0.8</b></span>
+        <input id="cfgTemp" type="range" min="0" max="1.2" step="0.1" value="0.8" />
+      </label>
+
+      <details class="promptbox">
+        <summary>查看系统提示词（作业用：AI 使用说明）</summary>
+        <pre id="promptPreview"></pre>
+      </details>
+
+      <div class="modal__actions">
+        <button class="btn btn--ghost" data-close>取消</button>
+        <button class="btn" id="cfgSave">保存并测试</button>
+      </div>
+      <p class="modal__status" id="cfgStatus"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 加载遮罩 ============ -->
+<div class="boot" id="boot">
+  <div class="boot__ring"></div>
+  <p class="boot__text">正在推演云山气象…</p>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/weather.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

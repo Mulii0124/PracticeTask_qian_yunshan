@@ -1,0 +1,16 @@
+{
+  "note": "MiniMax 图像生成节点 ID，用于重新拉取原始素材。配合 gen/requests.json 中的提示词可完整复现整套美术资源。",
+  "scenes": [
+    { "file": "scene-sunny.jpg",  "node_id": "461864175944751", "desc": "晨光山野，暖金主调，含亭台" },
+    { "file": "scene-cloudy.jpg", "node_id": "461864597746773", "desc": "云海漫山，冷灰主调，含廊桥" },
+    { "file": "scene-rain.jpg",   "node_id": "461864968270592", "desc": "烟雨石径，青碧主调，含雨幕与亭" },
+    { "file": "scene-snow.jpg",   "node_id": "461864506368809", "desc": "雪岭寒松，冷白主调，亭中暖灯" }
+  ],
+  "characters": [
+    { "file": "char-summer.png", "node_id": "461864840090385", "desc": "夏衫：短衫麻裤，草履高马尾" },
+    { "file": "char-mild.png",   "node_id": "461864035992497", "desc": "春秋：交领长衫罩背心，月白鸦青" },
+    { "file": "char-autumn.png", "node_id": "461865162167489", "desc": "深秋：赭石夹棉短袄，护腕皮靴" },
+    { "file": "char-winter.png", "node_id": "461864755807504", "desc": "冬裘：靛青毛领大氅，雪地靴" },
+    { "file": "char-rain.png",   "node_id": "461864553604268", "desc": "雨行：竹蓑斗笠，油纸伞" }
+  ]
+}

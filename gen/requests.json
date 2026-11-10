@@ -1,0 +1,58 @@
+{
+  "requests": [
+    {
+      "prompt": "Cinematic 3D render of a vast Chinese landscape, realistic ancient China, fused with traditional green-and-blue landscape painting (qinglue shanshui) and ink-wash aesthetics. CLEAR MORNING: warm golden sunlight breaking over layered mountain ridges, deep blue sky with soft cumulus clouds, glassy lake mirroring the peaks, ancient wooden pavilion with upturned eaves on a cliff edge, pine trees on the ridge. Atmospheric perspective, drifting mist between ridges, soft volumetric god rays, photorealistic PBR materials, natural color grading with jade green, ochre and ink black palette, ultra detailed, wide establishing shot, no people, no text, no watermark, high dynamic range",
+      "aspect_ratio": "16:9",
+      "resolution": "2K",
+      "output_file": "scene-sunny.jpg"
+    },
+    {
+      "prompt": "Cinematic 3D render of a vast Chinese landscape, realistic ancient China, fused with traditional green-and-blue landscape painting (qinglue shanshui) and ink-wash aesthetics. OVERCAST DAY: thick rolling cloud sea swallowing the middle ridges, diffused grey-blue soft light, muted desaturated palette, calm wide lake with mirror reflection, a lone twisted pine on a rocky outcrop, distant covered wooden bridge. Atmospheric perspective, layered mist, photorealistic PBR materials, ultra detailed, wide establishing shot, no people, no text, no watermark",
+      "aspect_ratio": "16:9",
+      "resolution": "2K",
+      "output_file": "scene-cloudy.jpg"
+    },
+    {
+      "prompt": "Cinematic 3D render of a vast Chinese landscape, realistic ancient China, fused with traditional green-and-blue landscape painting (qinglue shanshui) and ink-wash aesthetics. RAINY DAY: fine rain streaks falling through the air, wet dark rocks with glossy reflections, deep teal and slate green mountains, a winding stone path leading to a wooden pavilion, rain ripples spreading across a large lake, mossy bamboo grove, moody low contrast storm light, faint distant rainbow. Atmospheric perspective, photorealistic PBR materials, ultra detailed, wide establishing shot, no people, no text, no watermark",
+      "aspect_ratio": "16:9",
+      "resolution": "2K",
+      "output_file": "scene-rain.jpg"
+    },
+    {
+      "prompt": "Cinematic 3D render of a vast Chinese landscape, realistic ancient China, fused with traditional green-and-blue landscape painting (qinglue shanshui) and ink-wash aesthetics. SNOWY WINTER: snow blanketed mountains and heavy pine trees, pale blue and white cold palette, falling snowflakes, a frozen stream, dense fog, a distant pavilion window glowing warm orange lantern light for color contrast, snow covered wooden roof. Atmospheric perspective, volumetric cold light, photorealistic PBR materials, ultra detailed, wide establishing shot, no people, no text, no watermark",
+      "aspect_ratio": "16:9",
+      "resolution": "2K",
+      "output_file": "scene-snow.jpg"
+    },
+    {
+      "prompt": "Cinematic 3D game character render, full body standing, three-quarter view, realistic ancient Chinese clothing. HOT SUMMER OUTFIT: lightweight short-sleeved off-white linen short robe with sleeves rolled up, thin sash tied at the waist, loose cotton trousers, straw sandals, hair in a simple high ponytail, light cream and pale jade color scheme. Anatomically correct adult proportions, detailed fabric folds and cloth physics, soft warm rim lighting, subtle atmospheric haze, semi-realistic realistic rendering, character concept art, centered composition, isolated on a solid pure white background, no scenery, no ground shadow, no text",
+      "aspect_ratio": "3:4",
+      "resolution": "2K",
+      "output_file": "char-summer.jpg"
+    },
+    {
+      "prompt": "Cinematic 3D game character render, full body standing, three-quarter view, realistic ancient Chinese clothing. MILD SPRING AUTUMN OUTFIT: layered cross-collar mid-length robe in pale blue-grey over a cream inner shirt, a light sleeveless outer vest, soft cloth shoes, hair tied half-up with a simple wooden hairpin. Anatomically correct adult proportions, detailed fabric folds and cloth physics, soft warm rim lighting, subtle atmospheric haze, semi-realistic realistic rendering, character concept art, centered composition, isolated on a solid pure white background, no scenery, no ground shadow, no text",
+      "aspect_ratio": "3:4",
+      "resolution": "2K",
+      "output_file": "char-mild.jpg"
+    },
+    {
+      "prompt": "Cinematic 3D game character render, full body standing, three-quarter view, realistic ancient Chinese clothing. LATE AUTUMN OUTFIT: quilted mid-length padded jacket in deep ochre and warm brown over a dark inner robe, long woven scarf, leather wrist guards, tall boots, hair in a topknot with a small bronze crown. Anatomically correct adult proportions, detailed fabric folds and cloth physics, soft warm rim lighting, subtle atmospheric haze, semi-realistic realistic rendering, character concept art, centered composition, isolated on a solid pure white background, no scenery, no ground shadow, no text",
+      "aspect_ratio": "3:4",
+      "resolution": "2K",
+      "output_file": "char-autumn.jpg"
+    },
+    {
+      "prompt": "Cinematic 3D game character render, full body standing, three-quarter view, realistic ancient Chinese clothing. WINTER OUTFIT: thick fur-lined long winter robe in deep indigo and charcoal with white fur trim on collar and cuffs, heavy wool cloak, fur boots, layered winter scarf, hair tied with a dark ornament. Anatomically correct adult proportions, detailed fabric folds and cloth physics, cold soft rim lighting, subtle atmospheric haze, semi-realistic realistic rendering, character concept art, centered composition, isolated on a solid pure white background, no scenery, no ground shadow, no text",
+      "aspect_ratio": "3:4",
+      "resolution": "2K",
+      "output_file": "char-winter.jpg"
+    },
+    {
+      "prompt": "Cinematic 3D game character render, full body standing, three-quarter view, realistic ancient Chinese clothing. RAINY DAY OUTFIT: woven bamboo rain cape over a dark green waterproof robe, a wide conical straw hat, tall rain boots, holding a closed oiled paper umbrella, raindrops glistening on the shoulders, hair in a simple bun. Anatomically correct adult proportions, detailed fabric folds and cloth physics, soft cool rim lighting, subtle atmospheric haze, semi-realistic realistic rendering, character concept art, centered composition, isolated on a solid pure white background, no scenery, no ground shadow, no text",
+      "aspect_ratio": "3:4",
+      "resolution": "2K",
+      "output_file": "char-rain.jpg"
+    }
+  ]
+}
