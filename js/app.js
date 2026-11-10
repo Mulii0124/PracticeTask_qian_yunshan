@@ -28,7 +28,8 @@
     rerollBtn: $('#rerollBtn'), statusLeft: $('#statusLeft'),
     modal: $('#settingsModal'), cfgBaseUrl: $('#cfgBaseUrl'), cfgModel: $('#cfgModel'),
     cfgKey: $('#cfgKey'), cfgTemp: $('#cfgTemp'), tempVal: $('#tempVal'),
-    cfgSave: $('#cfgSave'), cfgStatus: $('#cfgStatus'), promptPreview: $('#promptPreview')
+    cfgSave: $('#cfgSave'), cfgStatus: $('#cfgStatus'), promptPreview: $('#promptPreview'),
+    cfgFetchModels: $('#cfgFetchModels'), modelList: $('#modelList')
   };
 
   let currentWeather = null;
@@ -439,6 +440,46 @@
     el.cfgStatus.textContent = r.message;
     el.cfgStatus.className = 'modal__status ' + (r.ok ? 'is-ok' : 'is-err');
     if (r.ok && currentWeather) refreshAdvice();
+  });
+
+  /* 拉取账号可用模型：避免手填模型名出错 */
+  el.cfgFetchModels.addEventListener('click', async () => {
+    const base = el.cfgBaseUrl.value.trim();
+    const key = el.cfgKey.value.trim();
+    if (!key){
+      el.cfgStatus.textContent = '请先填写 API Key，再拉取模型列表';
+      el.cfgStatus.className = 'modal__status is-err';
+      return;
+    }
+    if (!base){
+      el.cfgStatus.textContent = '请先填写接口地址';
+      el.cfgStatus.className = 'modal__status is-err';
+      return;
+    }
+    el.cfgFetchModels.classList.add('is-busy');
+    el.cfgStatus.textContent = '正在读取模型列表…';
+    el.cfgStatus.className = 'modal__status';
+    const r = await AI.listModels(base, key);
+    el.cfgFetchModels.classList.remove('is-busy');
+    el.cfgStatus.textContent = r.message;
+    el.cfgStatus.className = 'modal__status ' + (r.ok ? 'is-ok' : 'is-err');
+    if (r.ok && r.models.length){
+      el.modelList.innerHTML = '';
+      r.models.forEach(id => {
+        const o = document.createElement('option');
+        o.value = id;
+        el.modelList.appendChild(o);
+      });
+      // 当前填的模型不存在于列表时，自动选一个文本模型
+      const cur = el.cfgModel.value.trim();
+      if (!r.models.includes(cur)){
+        const prefer = r.models.find(m => /^MiniMax-M\d/i.test(m) && !/highspeed/i.test(m))
+                   || r.models.find(m => /text|chat/i.test(m))
+                   || r.models[0];
+        el.cfgModel.value = prefer;
+      }
+      el.cfgStatus.textContent = r.message + '，已填入「' + el.cfgModel.value + '」';
+    }
   });
 
   /* ============================================================

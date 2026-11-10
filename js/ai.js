@@ -9,8 +9,8 @@ const AI = (() => {
 
   const LS_KEY = 'yunshan.ai.config';
   const DEFAULTS = {
-    baseUrl: 'https://api.minimax.chat/v1',
-    model: 'MiniMax-M2',
+    baseUrl: 'https://api.minimaxi.com/v1',
+    model: 'MiniMax-M2.7',
     key: '',
     temperature: 0.8
   };
@@ -92,6 +92,38 @@ const AI = (() => {
     }
   }
 
+  /* ---------- 拉取账号可用模型 ---------- */
+  async function listModels(baseUrl, key){
+    const url = baseUrl.replace(/\/+$/, '') + '/models';
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 15000);
+    try {
+      const res = await fetch(url, {
+        headers: { 'Authorization': 'Bearer ' + key },
+        signal: ctrl.signal
+      });
+      clearTimeout(timer);
+      if (!res.ok) {
+        const t = await res.text().catch(() => '');
+        let msg = 'HTTP ' + res.status;
+        try {
+          const j = JSON.parse(t);
+          msg += ' ' + (j?.error?.message || j?.message || '');
+        } catch (e) { msg += ' ' + t.slice(0, 120); }
+        return { ok: false, message: msg };
+      }
+      const d = await res.json();
+      const arr = d?.data || d?.models || [];
+      const ids = arr
+        .map(m => (typeof m === 'string' ? m : (m?.id || m?.name || m?.model)))
+        .filter(Boolean);
+      return { ok: true, models: ids, message: '拉取成功，共 ' + ids.length + ' 个可用模型' };
+    } catch (e) {
+      clearTimeout(timer);
+      return { ok: false, message: e.name === 'AbortError' ? '请求超时' : e.message };
+    }
+  }
+
   /* ---------- 连通性测试 ---------- */
   async function test(){
     const url = cfg.baseUrl.replace(/\/+$/, '') + '/chat/completions';
@@ -166,5 +198,5 @@ const AI = (() => {
     return { ...localRecommend(weather, variantIndex), source: 'local' };
   }
 
-  return { loadConfig, saveConfig, getConfig, isConfigured, recommend, test, parseLoose };
+  return { loadConfig, saveConfig, getConfig, isConfigured, recommend, test, listModels, parseLoose };
 })();

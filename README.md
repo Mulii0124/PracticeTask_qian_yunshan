@@ -75,6 +75,7 @@ ai-outfit-assistant/
 │   ├── finalize.py         # 抠图后裁边 / 缩放 / 压缩
 │   ├── preview.py          # 生成素材总览图
 │   ├── desktop-check.html  # 开发辅助：在窄屏面板里校验 1440px 桌面布局
+│   ├── cors-check.html     # 开发辅助：实测各模型接口的浏览器跨域可用性
 │   └── preview-assets.png  # 素材总览
 ├── screenshot-desktop.png  # 成品截图（桌面端）
 └── screenshot-mobile.png   # 成品截图（移动端）
@@ -94,18 +95,61 @@ python -m http.server 8123
 
 ## 六、接入大模型
 
-1. 点右上角 **「AI 设置」**（金色齿轮按钮）打开「AI 配置」面板；
-2. 填写三项：
+### 6.1 三个字段填什么
 
-   | 字段 | 示例 | 说明 |
-   |---|---|---|
-   | 接口地址 Base URL | `https://api.minimax.chat/v1` | 不要带 `/chat/completions`，程序会自动拼接 |
-   | 模型 Model | `MiniMax-M2` | 任意支持中文与 JSON 输出的模型 |
-   | API Key | `sk-...` | 只保存在你自己浏览器的 localStorage，不经过任何第三方 |
+点右上角 **「AI 设置」**（金色齿轮）打开「AI 配置」面板，填三项：
 
-3. 点 **保存并测试**，显示"连接正常"即接入成功，页面右上角的标签会从「演示模式」变成「AI · 模型名」。
+| 字段 | 填什么 | 说明 |
+|---|---|---|
+| 接口地址 Base URL | `https://api.minimaxi.com/v1` | **不要带 `/chat/completions`**，程序会自动拼接 |
+| 模型 Model | `MiniMax-M2.7` | 拿不准就用下面的「拉取模型列表」按钮自动获取 |
+| API Key | `sk-...` 一长串 | 只存在你自己浏览器的 localStorage，不进仓库 |
 
-> 不配置也能用：此时由 `js/config.js` 中的本地规则引擎生成建议，状态栏会标注"本地规则引擎（未配置 API Key）"。
+填完点 **保存并测试**，显示「连接正常」即接入成功；页面右上角标签会从「演示模式」变成「AI · 模型名」，底栏也会标出当前模型。
+
+> 不配置也能用：此时由 `js/config.js` 的本地规则引擎生成建议，底栏标注「本地规则引擎（未配置 API Key）」。
+
+### 6.2 怎么拿到 API Key（以 MiniMax 中国大陆平台为例）
+
+1. 打开 **https://platform.minimaxi.com/login** 注册 / 登录（手机号验证码）
+2. **完成实名认证** —— 未认证会限制创建密钥和充值
+3. **充值** —— 余额为 0 时即使密钥正确也会报 `1008 insufficient balance`
+4. 左侧菜单 **「账户管理 → 接口密钥」→ 创建新的密钥**，填个备注名（如 `yunshan-web`）→ 创建
+5. 密钥**只完整显示一次**，弹窗关闭后无法再查看，立刻复制保存
+
+拿到后粘贴进页面的 API Key 输入框，点「拉取模型列表」会自动列出你账号实际可用的模型，选一个即可。
+
+### 6.3 三个最容易踩的坑
+
+| 现象 | 原因 | 解决 |
+|---|---|---|
+| 401 `login fail` | Key 复制不全 / 用了别的平台的 Key | 重新复制；确认平台与域名一致 |
+| 401 | 国内 Key 配了海外域名（或反之） | 国内用 `api.minimaxi.com`，海外用 `api.minimax.io`，**两者不可混用** |
+| 1008 余额不足 | 没充值 / 额度用完 | 回平台充值 |
+| 404 | Base URL 里手写了 `/v1/chat/completions` | 只填到 `/v1` 为止 |
+| 模型名报错 | 模型 ID 写错或该账号无权限 | 点「拉取模型列表」自动获取 |
+
+### 6.4 换其他服务商
+
+只要服务商提供 **OpenAI 兼容的 `POST {base}/chat/completions`**（DeepSeek、Kimi / 月之暗面、智谱 GLM、通义千问、SiliconFlow、Ollama 本地等）都可以，替换 Base URL / 模型 / Key 三个值即可。
+
+### 6.5 关于「把 Key 放在浏览器里」
+
+本项目把 Key 存在**使用者本机**的 localStorage，代码里是空的，仓库里没有任何密钥——公开的 GitHub Pages 因此是安全的。
+
+但仍请注意：**不要**把 Key 硬编码进 `js/ai.js` 再提交，那样全网都能看到你的 Key。MiniMax 官方也明确建议不要在浏览器端代码中放置服务端凭据。本项目之所以可行，是因为 Key 由每个访问者在自己浏览器里自行填写；**演示给别人看时，请让对方自己填自己的 Key**。
+
+### 6.6 跨域可用性（已实测）
+
+本项目从浏览器直连模型接口，因此接口必须允许跨域。已用 `gen/cors-check.html` 在真实浏览器中实测：
+
+| 域名 | `GET /v1/models` | `POST /v1/chat/completions` |
+|---|---|---|
+| `api.minimaxi.com` | HTTP 401 → 跨域通过 | HTTP 401 → 跨域通过 |
+| `api.minimax.io` | HTTP 401 → 跨域通过 | HTTP 401 → 跨域通过 |
+| `api.minimax.chat`（旧域名） | HTTP 401 → 跨域通过 | HTTP 401 → 跨域通过 |
+
+401 表示"网络可达、跨域放行，只是密钥无效"，说明浏览器直连这条路是通的。若将来换用其他服务商报跨域错误，页面会自动降级到本地规则引擎，不会白屏。
 
 ## 七、AI 使用说明
 

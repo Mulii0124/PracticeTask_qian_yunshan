@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>MiniMax 跨域可用性实测</title></head>
+<body style="background:#0d141c;color:#e6e8e4;font-family:Consolas,monospace;padding:16px">
+<pre id="out">测试中…</pre>
+<script>
+const BASE = [
+  'https://api.minimax.io',
+  'https://api.minimaxi.com',
+  'https://api.minimax.chat'
+];
+const out = document.getElementById('out');
+const log = (s) => { out.textContent += s; };
+
+(async () => {
+  log('=== 1. GET /v1/models（简单请求，测响应是否可读）===\n');
+  for (const b of BASE) {
+    const u = b + '/v1/models';
+    try {
+      const r = await fetch(u);
+      log(u + '\n   HTTP ' + r.status + '  → 跨域通过\n\n');
+    } catch (e) {
+      log(u + '\n   ✗ 跨域被拦截：' + e.message + '\n\n');
+    }
+  }
+
+  log('=== 2. POST /v1/chat/completions（带 Authorization 头，会触发预检）===\n');
+  for (const b of BASE) {
+    const u = b + '/v1/chat/completions';
+    try {
+      const r = await fetch(u, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer dummy-key-for-cors-test' },
+        body: JSON.stringify({ model: 'MiniMax-M3', messages: [{ role: 'user', content: 'hi' }], max_tokens: 5 })
+      });
+      const t = await r.text();
+      log(u + '\n   HTTP ' + r.status + '  → 跨域通过\n   返回片段: ' + t.slice(0, 160) + '\n\n');
+    } catch (e) {
+      log(u + '\n   ✗ 跨域被拦截：' + e.message + '\n\n');
+    }
+  }
+
+  log('=== 3. 旧版原生端点 POST /v1/text/chatcompletion_v2 ===\n');
+  try {
+    const r = await fetch('https://api.minimax.chat/v1/text/chatcompletion_v2', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer dummy-key-for-cors-test' },
+      body: JSON.stringify({ model: 'MiniMax-M2', messages: [{ role: 'user', content: 'hi' }] })
+    });
+    const t = await r.text();
+    log('   HTTP ' + r.status + ' → 跨域通过\n   返回片段: ' + t.slice(0, 200) + '\n');
+  } catch (e) {
+    log('   ✗ 跨域被拦截：' + e.message + '\n');
+  }
+})();
+</script>
+</body>
+</html>
