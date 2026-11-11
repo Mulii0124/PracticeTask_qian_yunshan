@@ -33,6 +33,29 @@ const AI = (() => {
   function getConfig(){ return { ...cfg }; }
   function isConfigured(){ return !!(cfg.key && cfg.baseUrl && cfg.model); }
 
+  /* ---------- 按服务商适配请求体 ----------
+     MiniMax 的 M3 系列强制开启深度思考（thinking:disabled 直接 400），
+     且 max_tokens 已弃用 —— 必须用 max_completion_tokens 给「思考 + 正文」留够预算，
+     否则思考链会把预算吃光，正文 content 为空、finish_reason=length。
+     reasoning_effort 默认是 max，显式降到 low 才能在几百 token 内出正文。 */
+  const TOKEN_BUDGET = 16000;
+  function isMiniMax(baseUrl){ return /minimax/i.test(String(baseUrl || '')); }
+  function buildBody(messages, budget){
+    const body = {
+      model: cfg.model,
+      messages: messages,
+      temperature: Number(cfg.temperature),
+      stream: false
+    };
+    if (isMiniMax(cfg.baseUrl)){
+      body.max_completion_tokens = budget || TOKEN_BUDGET;
+      body.reasoning_effort = 'low';
+    } else {
+      body.max_tokens = budget || 3000;
+    }
+    return body;
+  }
+
   /* ---------- JSON 解析容错 ---------- */
   function parseLoose(text){
     if (!text) return null;
@@ -52,16 +75,10 @@ const AI = (() => {
   /* ---------- 调用大模型 ---------- */
   async function callModel(weather, variant){
     const url = cfg.baseUrl.replace(/\/+$/, '') + '/chat/completions';
-    const body = {
-      model: cfg.model,
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user',   content: buildUserPrompt(weather) }
-      ],
-      temperature: Number(cfg.temperature),
-      max_tokens: 3000,
-      stream: false
-    };
+    const body = buildBody([
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user',   content: buildUserPrompt(weather) }
+    ]);
 
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 45000);
@@ -81,18 +98,25 @@ const AI = (() => {
         throw new Error('HTTP ' + res.status + ' ' + t.slice(0, 160));
       }
       const data = await res.json();
-      const msg = data?.choices?.[0]?.message;
-      let content = msg?.content;
-      // 开启思考模式的模型，最终答案偶尔会落在 reasoning 字段里
+      const choice = data?.choices?.[0] || {};
+      const msg = choice.message || {};
+      let content = msg.content;
+
+      // 开启思考的模型，最终答案偶尔会落在 reasoning 字段里
       if (!content || !String(content).trim()){
-        if (Array.isArray(msg?.reasoning_details)){
+        if (Array.isArray(msg.reasoning_details)){
           content = msg.reasoning_details.map(x => x?.text || '').join('\n');
-        } else if (msg?.reasoning_content){
+        } else if (msg.reasoning_content){
           content = msg.reasoning_content;
         }
       }
       const obj = parseLoose(content);
-      if (!obj || !obj.outfit) throw new Error('返回内容不是预期的 JSON');
+      if (!obj || !obj.outfit){
+        if (choice.finish_reason === 'length'){
+          throw new Error('模型输出被长度上限截断（思考过程占满预算），请调大 max_completion_tokens 或降低 reasoning_effort');
+        }
+        throw new Error('返回内容不是预期的 JSON（finish_reason=' + (choice.finish_reason || '未知') + '）');
+      }
       return { data: obj, raw: content, model: data?.model || cfg.model };
     } catch (e) {
       clearTimeout(timer);
@@ -136,24 +160,23 @@ const AI = (() => {
   async function test(){
     const url = cfg.baseUrl.replace(/\/+$/, '') + '/chat/completions';
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 20000);
+    const timer = setTimeout(() => ctrl.abort(), 30000);
     try {
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key },
-        body: JSON.stringify({
-          model: cfg.model,
-          messages: [{ role: 'user', content: '回复两个字：可用' }],
-          max_tokens: 16,
-          stream: false
-        }),
+        body: JSON.stringify(buildBody([{ role: 'user', content: '回复两个字：可用' }], 2048)),
         signal: ctrl.signal
       });
       clearTimeout(timer);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const d = await res.json();
-      const txt = d?.choices?.[0]?.message?.content || '';
-      return { ok: true, message: '连接正常，模型回复：' + String(txt).trim().slice(0, 20) };
+      const choice = d?.choices?.[0] || {};
+      const msg = choice.message || {};
+      // 深度思考模型可能正文为空，此时取思考内容让用户看到模型确实在动
+      const txt = msg.content || msg.reasoning_content || '';
+      const preview = String(txt).trim().slice(0, 20);
+      return { ok: true, message: '连接正常，模型回复：' + (preview || '（模型仅返回思考内容，finish_reason=' + (choice.finish_reason || '未知') + '）') };
     } catch (e) {
       clearTimeout(timer);
       return { ok: false, message: '连接失败：' + e.message };

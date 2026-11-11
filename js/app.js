@@ -201,6 +201,8 @@
       setTier(figureFor(w));
       updateFx(w);
       if (!opts.silent) try { localStorage.setItem(LS_CITY, JSON.stringify(place)); } catch (e) {}
+      // 天气部分已就绪，先收起启动屏；AI 建议继续在后台推演
+      if (opts.onWeatherReady) opts.onWeatherReady();
       await refreshAdvice();
     } catch (e){
       el.cityName.textContent = place.name;
@@ -213,8 +215,23 @@
     const variant = rerollCount > 0
       ? '请给出一套与上次不同的方案：更换配色与材质方向，但同样要贴合今日气温与天气。'
       : '';
+    // 调大模型通常要十几秒，先给出明确反馈，避免用户以为页面卡死
+    if (AI.isConfigured()) showAiPending();
     const res = await AI.recommend(currentWeather, variant, rerollCount);
     renderAdvice(res);
+  }
+
+  function showAiPending(){
+    el.aiChip.textContent = 'AI 推演中';
+    el.aiChip.className = 'chip chip--ai';
+    el.statusLeft.textContent = '数据来源：Open-Meteo · 正在向大模型推演今日方案…';
+    el.outfitTitle.textContent = '推演中…';
+    el.outfitSummary.textContent = '正在向大模型推演今日穿搭与出行方案，通常需要 10–30 秒，请稍候…';
+    el.outfitSlots.innerHTML = '';
+    el.paletteRow.innerHTML = '';
+    el.travelSummary.textContent = '推演中…';
+    el.travelTips.innerHTML = '';
+    el.dailyNote.textContent = '—';
   }
 
   /* ============================================================
@@ -510,6 +527,13 @@
   /* ============================================================
      启动
      ============================================================ */
+  let bootHidden = false;
+  function hideBoot(){
+    if (bootHidden) return;
+    bootHidden = true;
+    setTimeout(() => el.boot.classList.add('is-hidden'), 420);
+  }
+
   async function boot(){
     AI.loadConfig();
 
@@ -523,10 +547,10 @@
     if (!place) place = DEMO_CITIES[0];
 
     try {
-      await loadPlace(place);
+      await loadPlace(place, { onWeatherReady: hideBoot });
     } catch (e) { /* 已在 loadPlace 内处理 */ }
 
-    setTimeout(() => el.boot.classList.add('is-hidden'), 420);
+    hideBoot();
 
     // 首次访问尝试定位（静默，失败不打扰）
     if (!localStorage.getItem(LS_CITY) && navigator.geolocation){
