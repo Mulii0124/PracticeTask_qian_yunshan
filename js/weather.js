@@ -57,9 +57,12 @@ const Weather = (() => {
 
   /* ---------- 反查地名 ---------- */
   async function reverseName(lat, lon){
+    // 该接口在部分网络下不可达/极慢，加超时避免整个定位流程被挂死
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 6000);
     try {
       const url = `${REVERSE_URL}?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=zh-CN&zoom=10`;
-      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      const res = await fetch(url, { signal: ctrl.signal, headers: { 'Accept': 'application/json' } });
       if (!res.ok) return null;
       const d = await res.json();
       const a = d.address || {};
@@ -67,7 +70,10 @@ const Weather = (() => {
       if (!name) return null;
       return { name, country: a.country || '' };
     } catch (e) {
+      // 超时 / 断网 / 被墙：返回 null，由调用方回退到「当前位置」
       return null;
+    } finally {
+      clearTimeout(timer);
     }
   }
 

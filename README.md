@@ -52,6 +52,7 @@
 | 定位 | 浏览器 Geolocation + OpenStreetMap 反查地名 |
 | 换一套 | 重新生成一套配色与配饰方向不同的方案 |
 | AI 配置面板 | 在页面内填 Base URL / 模型 / API Key，自带连通性测试；**Key 类型预设**（M Plan 订阅 / 按量计费）一键切换域名与模型；可拉取账号可用模型列表；面板内可直接查看完整系统提示词 |
+| 超链接 | 页脚 4 条外链（天气数据源 / 模型平台 / 作业说明 / 源码仓库）+ 天气面板可点击的数据来源标签 + 配置面板内的官方文档链接 |
 | 降级机制 | 模型调用失败自动回落到本地规则引擎，并在状态栏注明原因 |
 
 ## 三、技术栈
@@ -239,6 +240,7 @@ isolated on a solid pure white background, no scenery, no ground shadow, no text
 | 4 | 立绘超出中列容器，把穿搭分级徽章挤出视口 | 中列改为视口高度约束 + 立绘 `flex` 自适应 |
 | 5 | "换一套"在本地降级模式下输出完全不变 | 本地引擎加入配饰 / 配色 / 点句的轮换表 |
 | 6 | 立绘由 JPG 换成透明 PNG 后，代码中路径未同步 | 同步更新 `config.js` 与 `index.html` |
+| 7 | 「定位」的反查地名请求（Nominatim）没有超时，在该接口不可达的网络下 `await` 永远挂起，导致点了定位按钮天气不刷新、像失灵一样 | 给 `reverseName()` 加 `AbortController` 6 秒超时，超时自动回退为「当前位置」并继续加载天气 |
 
 另外还补充了初版没有的能力：昼夜色调切换、天气粒子系统、24 小时预报条、配置面板的连通性测试与提示词预览。
 
@@ -275,6 +277,21 @@ isolated on a solid pure white background, no scenery, no ground shadow, no text
 | 城市检索 | Open-Meteo Geocoding API | 同上 |
 | 地名反查 | [OpenStreetMap Nominatim](https://nominatim.openstreetmap.org/) | ODbL |
 | 全部美术资源 | AI 生成（MiniMax 图像生成） | 本项目自用 |
+
+### 页面中的超链接
+
+页面共使用 6 处超链接，全部为 `target="_blank" rel="noopener noreferrer"` 的外链：
+
+| 位置 | 链接文字 | 指向 | 作用 |
+|---|---|---|---|
+| 页脚 | Open-Meteo 天气 | <https://open-meteo.com/> | 天气数据来源署名 |
+| 页脚 | MiniMax 开放平台 | <https://platform.minimax.cn/docs> | AI 模型服务商与接入文档 |
+| 页脚 | 作业说明 README | 仓库 README 页面 | 在线查看本说明（含 AI 使用说明） |
+| 页脚 | 源码仓库 | GitHub 仓库首页 | 查看全部源码 |
+| 天气面板 | Open-Meteo · 时区 | <https://open-meteo.com/> | 可点击的数据来源标签 |
+| AI 配置面板 | 官方文档 ↗ | <https://platform.minimax.cn/docs/llms.txt> | Base URL 与取 Key 方式的官方说明 |
+
+> 所有链接目标均已用 HTTP HEAD 实测可达（200），并逐个在浏览器中确认可正常打开新标签页。
 
 ## 九、已知限制
 

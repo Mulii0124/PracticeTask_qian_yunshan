@@ -66,7 +66,7 @@
     <article class="panel panel--weather" id="weatherPanel">
       <div class="panel__head">
         <span class="panel__label">实时天气</span>
-        <span class="chip" id="sourceChip">Open-Meteo</span>
+        <a class="chip chip--link" id="sourceChip" href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" title="访问 Open-Meteo 官网">Open-Meteo</a>
       </div>
 
       <div class="weather__main">
@@ -148,6 +148,12 @@
 <!-- ============ 底栏 ============ -->
 <footer class="statusbar">
   <span id="statusLeft">数据来源：Open-Meteo · 建议模型：本地规则引擎</span>
+  <nav class="statusbar__links" aria-label="相关链接">
+    <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo 天气</a>
+    <a href="https://platform.minimax.cn/docs" target="_blank" rel="noopener noreferrer">MiniMax 开放平台</a>
+    <a href="https://github.com/Mulii0124/PracticeTask_qian_yunshan#readme" target="_blank" rel="noopener noreferrer">作业说明 README</a>
+    <a href="https://github.com/Mulii0124/PracticeTask_qian_yunshan" target="_blank" rel="noopener noreferrer">源码仓库</a>
+  </nav>
   <span class="statusbar__right">云山行 · 网页设计课程作业 · AI 辅助生成</span>
 </footer>
 
@@ -185,7 +191,7 @@
       <label class="field">
         <span>接口地址 Base URL</span>
         <input id="cfgBaseUrl" type="text" spellcheck="false" placeholder="https://api.minimax.cn/v1" />
-        <em class="field__hint">M Plan 订阅 Key 用 api.minimax.cn；按量计费 Key 用 api.minimaxi.com；海外用 api.minimax.io</em>
+        <em class="field__hint">M Plan 订阅 Key 用 api.minimax.cn；按量计费 Key 用 api.minimaxi.com；海外用 api.minimax.io。域名与取 Key 方式见 <a class="inline-link" href="https://platform.minimax.cn/docs/llms.txt" target="_blank" rel="noopener noreferrer">官方文档 ↗</a></em>
       </label>
       <label class="field">
         <span>模型 Model</span>

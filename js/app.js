@@ -266,12 +266,15 @@
     }
     el.geoBtn.style.opacity = '.5';
     navigator.geolocation.getCurrentPosition(async (pos) => {
-      el.geoBtn.style.opacity = '1';
-      const { latitude: lat, longitude: lon } = pos.coords;
-      let name = '当前位置', country = '';
-      const rev = await Weather.reverseName(lat, lon);
-      if (rev){ name = rev.name; country = rev.country; }
-      loadPlace({ name, country, lat, lon });
+      try {
+        const { latitude: lat, longitude: lon } = pos.coords;
+        let name = '当前位置', country = '';
+        const rev = await Weather.reverseName(lat, lon);
+        if (rev){ name = rev.name; country = rev.country; }
+        await loadPlace({ name, country, lat, lon });
+      } finally {
+        el.geoBtn.style.opacity = '1';
+      }
     }, () => {
       el.geoBtn.style.opacity = '1';
       el.condText.textContent = '定位被拒绝，请使用城市搜索';
